@@ -1,0 +1,28 @@
+{
+  "description": "Shared memory bridge: saves each turn and surfaces the other tool's new records.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .memory-bridge/bridge.js prompt codex",
+            "timeout": 10,
+            "additionalContextLimit": 6000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .memory-bridge/bridge.js stop codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
