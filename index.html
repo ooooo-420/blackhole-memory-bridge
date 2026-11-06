@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>wuu 作品集</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;900&family=Bricolage+Grotesque:opsz,wght@12..96,800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;900&family=Noto+Sans+SC:wght@400;500;900&family=Bricolage+Grotesque:opsz,wght@12..96,800&display=swap">
 <style>
 /* Layout: one screen, no scrolling. The black hole follows the pointer; works fall in and come back out as things you can use. */
 :root{color-scheme:dark;--void:#020205;--text:#f4efe5;--soft:#bdb8ae;--ember:#ffb56b;--body:"Noto Sans TC","Microsoft JhengHei",sans-serif}
@@ -13,7 +13,12 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--void);color:var(
 ::selection{background:var(--ember);color:#000}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block}
 #gl{touch-action:none}
-#mark{position:fixed;z-index:2;left:28px;top:18px;margin:0;font:800 26px/1 "Bricolage Grotesque",var(--body);letter-spacing:-.02em}
+:root:lang(zh-Hans){--body:"Noto Sans SC","Microsoft YaHei",sans-serif}
+#top{position:fixed;z-index:2;left:28px;top:18px;display:flex;align-items:center;gap:12px}
+#lang{all:unset;box-sizing:border-box;width:28px;height:28px;border-radius:50%;border:1px solid rgba(244,239,229,.34);display:grid;place-items:center;color:var(--soft);font:500 12px/1 var(--body);cursor:pointer;transition:color .2s,border-color .2s}
+#lang:hover{color:var(--text);border-color:var(--ember)}
+#lang:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+#mark{margin:0;font:800 26px/1 "Bricolage Grotesque",var(--body);letter-spacing:-.02em}
 .sr{position:fixed;z-index:1;left:28px;bottom:20px;display:flex;gap:18px}
 .sr button{all:unset;cursor:pointer;color:var(--soft);font-size:14px}
 .sr button:hover{color:var(--text)}
@@ -56,7 +61,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 @media (max-width:640px){.talk{grid-template-columns:minmax(0,1fr)}}
 </style>
 <canvas id="gl" role="img" aria-label="黑洞和三個作品的名字。點名字，或把黑洞拖到名字上"></canvas>
-<p id="mark">wuu</p>
+<div id="top"><p id="mark">wuu</p><button id="lang"></button></div>
 <nav class="sr" aria-label="作品"><button data-open="0">記憶橋接</button><button data-open="1">簡歷工作台</button><button data-open="2">個人工作台</button></nav>
 <div id="scrim"></div>
 
@@ -159,9 +164,9 @@ const U=n=>gl.getUniformLocation(pr,n),uRes=U('res'),uHole=U('hole'),uR=U('R'),u
 gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
 const tc=document.createElement('canvas'),tx=tc.getContext('2d');
-let scale=.8,slow=0,last=0,hover=-1;
+let scale=.8,slow=0,last=0,hover=-1,lang='tc';
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='middle';tx.textAlign='center';const fs=Math.min(w*.075,h*.15);tx.font=`900 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='middle';tx.textAlign='center';const fs=lang==="en"?Math.min(w*.058,h*.13):Math.min(w*.075,h*.15);tx.font=`900 ${fs}px ${lang==="sc"?'"Noto Sans SC","Microsoft YaHei"':'"Noto Sans TC","Microsoft JhengHei"'},sans-serif`;
  const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillStyle=WORKS[hover]===k?'#ffb56b':'#f7f0e0';tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc)}
 function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);paint()}
@@ -196,12 +201,13 @@ document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',(
 /* memory demo */
 const left=document.getElementById('left'),right=document.getElementById('right'),go=document.getElementById('go'),line=document.getElementById('line');let saved='';
 const add=(box,t,ai)=>{const d=document.createElement('div');d.className='msg'+(ai?' ai':'');d.textContent=t;box.append(d);d.style.marginBottom='8px'};
-document.getElementById('say').addEventListener('submit',e=>{e.preventDefault();const t=line.value.trim();if(!t)return;saved=t;add(left,t);add(left,'好，開始處理。',true);line.value='';go.disabled=false});
-go.addEventListener('click',()=>{if(!saved)return;right.replaceChildren();add(right,'接著做？');add(right,`我看到你剛才在 Claude Code 說「${saved}」，已經開始處理了。我接著做。`,true);go.disabled=true});
+document.getElementById('say').addEventListener('submit',e=>{e.preventDefault();const t=line.value.trim();if(!t)return;saved=t;add(left,t);add(left,T[lang].ok,true);line.value='';go.disabled=false});
+go.addEventListener('click',()=>{if(!saved)return;right.replaceChildren();add(right,T[lang].ask);add(right,T[lang].reply(saved),true);go.disabled=true});
 /* resume demo */
-const roles={'PE/VC':['財務與業務核驗','核對項目收入的合併範圍，按區域拆解業務構成，結合客戶結構形成風險分析，供項目討論使用。'],'FA':['項目材料與比較分析','按區域與客戶結構組織業務數據，標注不同口徑，形成項目介紹與比較分析材料。'],'戰略分析':['業務結構與風險判斷','拆解不同區域及客戶的收入構成，識別口徑差異，整理業務結構與風險判斷依據。']};
-function role(k){document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===k));document.getElementById('role-title').textContent=roles[k][0];document.getElementById('role-copy').textContent=roles[k][1]}
-document.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>role(b.dataset.role)));role('PE/VC');
+let curRole=0;
+const roleBtns=[...document.querySelectorAll('[data-role]')];
+function role(i){curRole=i;roleBtns.forEach((b,n)=>b.setAttribute('aria-pressed',n===i));const r=T[lang].roles[i];document.getElementById('role-title').textContent=r[1];document.getElementById('role-copy').textContent=r[2]}
+roleBtns.forEach((b,i)=>b.addEventListener('click',()=>role(i)));
 /* workbench demo */
 document.querySelectorAll('.task').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('done');document.getElementById('count').textContent=document.querySelectorAll('.task.done').length+' / 3'}));
 function tick(ms){
@@ -221,7 +227,34 @@ function tick(ms){
  gl.uniform2f(uHole,S.hole[0],S.hole[1]);gl.uniform1f(uR,S.R);gl.uniform1f(uT,ms/1000);gl.uniform1f(uPull,S.pull);
  gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(tick);
 }
+const T={
+tc:{badge:'繁',html:'zh-Hant',title:'wuu 作品集',switchTo:'切換語言，目前是繁體中文',canvas:'黑洞和三個作品的名字。點名字，或把黑洞拖到名字上',close:'關閉',names:['記憶中轉站','簡歷工作台','個人工作台'],pos:[[.25,.27],[.72,.45],[.33,.76]],
+ h0:'換一個 AI，不用再講一遍',p0:'我同時用 Claude Code 和 Codex，這個工具讓它們共用進度。你試試：',say:'對 Claude Code 說的話',first:'幫我把報告改成三頁',send:'送出',go:'換到 Codex',n0:'這裡是模擬。真正的版本用 Hook 自動保存，在你下一句話時交給另一邊。',l0:'GitHub 上的程式碼',ok:'好，開始處理。',ask:'接著做？',reply:s=>`我看到你剛才在 Claude Code 說「${s}」，已經開始處理了。我接著做。`,
+ h1:'同一段經歷，投不同崗位',p1:'簡歷工作台從真實作品裡找證據，不編造。選一個崗位看看：',src:'原文：按區域拆分收入，核對合併範圍，比較客戶結構，形成業務與風險分析。',roles:[['PE/VC','財務與業務核驗','核對項目收入的合併範圍，按區域拆解業務構成，結合客戶結構形成風險分析，供項目討論使用。'],['FA','項目材料與比較分析','按區域與客戶結構組織業務數據，標注不同口徑，形成項目介紹與比較分析材料。'],['戰略分析','業務結構與風險判斷','拆解不同區域及客戶的收入構成，識別口徑差異，整理業務結構與風險判斷依據。']],sample:'示例資料',full:'完整展示',
+ h2:'今天要做什麼，打開就知道',p2:'安排、投遞和項目都在一處，一條記錄只寫一次。',tasks:['閱讀行業資料 · 09:30','跟進示例投遞 · 14:00','複盤示例項目 · 17:00']},
+sc:{badge:'简',html:'zh-Hans',title:'wuu 作品集',switchTo:'切换语言，当前是简体中文',canvas:'黑洞和三个作品的名字。点名字，或把黑洞拖到名字上',close:'关闭',names:['记忆中转站','简历工作台','个人工作台'],pos:[[.25,.27],[.72,.45],[.33,.76]],
+ h0:'换一个 AI，不用再讲一遍',p0:'我同时用 Claude Code 和 Codex，这个工具让它们共用进度。你试试：',say:'对 Claude Code 说的话',first:'帮我把报告改成三页',send:'发送',go:'换到 Codex',n0:'这里是模拟。真正的版本用 Hook 自动保存，在你下一句话时交给另一边。',l0:'GitHub 上的代码',ok:'好，开始处理。',ask:'接着做？',reply:s=>`我看到你刚才在 Claude Code 说“${s}”，已经开始处理了。我接着做。`,
+ h1:'同一段经历，投不同岗位',p1:'简历工作台从真实作品里找证据，不编造。选一个岗位看看：',src:'原文：按区域拆分收入，核对合并范围，比较客户结构，形成业务与风险分析。',roles:[['PE/VC','财务与业务核验','核对项目收入的合并范围，按区域拆解业务构成，结合客户结构形成风险分析，供项目讨论使用。'],['FA','项目材料与比较分析','按区域与客户结构组织业务数据，标注不同口径，形成项目介绍与比较分析材料。'],['战略分析','业务结构与风险判断','拆解不同区域及客户的收入构成，识别口径差异，整理业务结构与风险判断依据。']],sample:'示例数据',full:'完整展示',
+ h2:'今天要做什么，打开就知道',p2:'安排、投递和项目都在一处，一条记录只写一次。',tasks:['阅读行业资料 · 09:30','跟进示例投递 · 14:00','复盘示例项目 · 17:00']},
+en:{badge:'En',html:'en',title:'wuu portfolio',switchTo:'Change language, currently English',canvas:'A black hole and three project names. Click a name, or drag the black hole onto it.',close:'Close',names:['Memory Relay','Resume Workbench','Personal Workbench'],pos:[[.25,.26],[.69,.47],[.34,.75]],
+ h0:'Switch AIs without repeating yourself',p0:'I use both Claude Code and Codex. This tool lets them share progress. Try it:',say:'Message to Claude Code',first:'Cut my report down to three pages',send:'Send',go:'Switch to Codex',n0:'This is a simulation. The real version saves automatically through hooks and hands over on your next message.',l0:'Code on GitHub',ok:'On it.',ask:'Can you pick this up?',reply:s=>`I can see you told Claude Code "${s}" and that it has started. I'll take it from here.`,
+ h1:'One experience, different roles',p1:'Resume Workbench finds evidence in real work and never invents it. Pick a role:',src:'Source: Split revenue by region, checked the consolidation scope, compared customer mix, and wrote a business and risk analysis.',roles:[['PE/VC','Financial and business verification','Checked the consolidation scope of project revenue, broke the business down by region, and used customer mix to build a risk analysis for investment discussions.'],['FA','Project materials and comparisons','Organized business data by region and customer mix, flagged differences in reporting basis, and produced project introductions and comparison materials.'],['Strategy','Business structure and risk','Broke revenue down by region and customer, identified differences in reporting basis, and assembled the evidence for business structure and risk judgments.']],sample:'Sample data',full:'Full showcase',
+ h2:'Open it and know what today needs',p2:'Schedule, applications and projects in one place. Each record is written once.',tasks:['Read industry reports · 09:30','Follow up on sample application · 14:00','Review sample project · 17:00']}};
+const ORDER=['tc','sc','en'],$=s=>document.querySelector(s);
+function setLang(l,save){lang=l;const t=T[l];document.documentElement.lang=t.html;document.title=t.title;
+ const b=$('#lang');b.textContent=t.badge;b.setAttribute('aria-label',t.switchTo);b.title=t.switchTo;cv.setAttribute('aria-label',t.canvas);
+ document.querySelectorAll('.x').forEach(x=>x.setAttribute('aria-label',t.close));
+ WORKS.forEach((k,i)=>{k.name=t.names[i];k.x=t.pos[i][0];k.y=t.pos[i][1];$(`[data-open="${i}"]`).textContent=k.name;$('#p'+i).setAttribute('aria-label',k.name)});
+ [['#p0 h2','h0'],['#p0>p','p0'],['#say button','send'],['#go','go'],['#p0 .note','n0'],['#p0 .link','l0'],['#p1 h2','h1'],['#p1>p','p1'],['.src','src'],['#p1 .note','sample'],['#p1 .link','full'],['#p2 h2','h2'],['#p2>p','p2'],['#p2 .note','sample'],['#p2 .link','full']].forEach(([s,k])=>{$(s).textContent=t[k]});
+ line.setAttribute('aria-label',t.say);line.value=t.first;saved='';left.replaceChildren();right.replaceChildren();go.disabled=true;
+ roleBtns.forEach((n,i)=>{n.textContent=t.roles[i][0]});role(curRole);
+ document.querySelectorAll('.task span').forEach((n,i)=>{n.textContent=t.tasks[i]});
+ paint();if(document.fonts)document.fonts.load(l==='sc'?'900 60px "Noto Sans SC"':'900 60px "Noto Sans TC"',t.names.join('')).then(paint).catch(()=>{});
+ if(save)try{localStorage.setItem('wuu-lang',l)}catch(e){}}
+function firstLang(){try{const s=localStorage.getItem('wuu-lang');if(T[s])return s}catch(e){}
+ const n=(navigator.language||'').toLowerCase();if(!n.startsWith('zh'))return 'en';return /hans|cn|sg/.test(n)?'sc':'tc'}
+$('#lang').addEventListener('click',()=>{if(S.mode!=='free')return;setLang(ORDER[(ORDER.indexOf(lang)+1)%3],true)});
 window.__S=S;window.__works=WORKS;
-gl.uniform4f(uRgn,0,0,0,0);resize();
-(document.fonts?document.fonts.load('900 60px "Noto Sans TC"','記憶橋接簡歷工作台個人').catch(()=>{}):Promise.resolve()).then(()=>{paint();requestAnimationFrame(tick)});
+gl.uniform4f(uRgn,0,0,0,0);setLang(firstLang());resize();
+(document.fonts?document.fonts.load('900 60px "Noto Sans TC"',T.tc.names.join('')).catch(()=>{}):Promise.resolve()).then(()=>{paint();requestAnimationFrame(tick)});
 </script>
