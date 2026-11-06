@@ -1,8 +1,8 @@
-# Black Hole Memory Bridge
+# Black Hole Memory Relay
 
 I use both Claude Code and Codex, and every time I switched tools I had to explain my progress again. This project saves both sides' conversations automatically and hands over the other side's new records on your next message. There is also a black hole desktop pet.
 
-[Portfolio](https://ooooo-420.github.io/blackhole-memory-bridge/)
+[Portfolio](https://ooooo-420.github.io/blackhole-memory-relay/)
 
 ## How it works
 
