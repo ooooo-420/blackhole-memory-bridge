@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>wuu 作品集</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;900&family=Bricolage+Grotesque:opsz,wght@12..96,800&display=swap">
+<style>
+/* Layout: one screen, no scrolling. The black hole follows the pointer; works fall in and come back out as things you can use. */
+:root{color-scheme:dark;--void:#020205;--text:#f4efe5;--soft:#bdb8ae;--ember:#ffb56b;--body:"Noto Sans TC","Microsoft JhengHei",sans-serif}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--void);color:var(--text);font:400 17px/1.7 var(--body)}
+::selection{background:var(--ember);color:#000}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+#mark{position:fixed;z-index:2;left:28px;top:18px;margin:0;font:800 26px/1 "Bricolage Grotesque",var(--body);letter-spacing:-.02em}
+.sr{position:fixed;z-index:1;left:28px;bottom:20px;display:flex;gap:18px}
+.sr button{all:unset;cursor:pointer;color:var(--soft);font-size:14px}
+.sr button:hover{color:var(--text)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+#scrim{position:fixed;inset:0;z-index:3;background:rgba(2,2,5,.55);opacity:0;pointer-events:none;transition:opacity .4s}
+#scrim.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;z-index:4;left:50%;top:50%;width:min(860px,calc(100vw - 48px));max-height:calc(100vh - 48px);overflow:auto;padding:clamp(24px,4vw,48px);margin:0;translate:-50% -50%;visibility:hidden;box-shadow:0 40px 120px rgba(0,0,0,.7)}
+.panel.on{visibility:visible}
+.panel h2{font:900 clamp(30px,4vw,50px)/1.15 var(--body);letter-spacing:-.02em;margin:0 44px 8px 0}
+.panel>p{margin:0 0 24px}
+.x{all:unset;position:absolute;right:20px;top:20px;width:36px;height:36px;display:grid;place-items:center;cursor:pointer}
+.x svg{width:18px;height:18px;stroke:currentColor;stroke-width:2}
+.x:hover{opacity:.6}
+.link{display:inline-block;margin-top:22px;color:inherit;text-underline-offset:5px}
+.note{font-size:14px;opacity:.72;margin:14px 0 0}
+#p0{background:#11131a}
+.talk{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.side{background:#191c25;padding:16px;min-height:210px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.side b{font-weight:500;color:var(--soft);font-size:14px}
+.msg{padding:8px 12px;background:#262a35;width:fit-content;max-width:100%;overflow-wrap:anywhere}
+.msg.ai{background:none;padding:8px 0;color:var(--ember)}
+#say{display:flex;gap:8px;margin-top:auto}
+#say input{flex:1;min-width:0;background:#0d0f14;border:1px solid #3a3e4a;color:var(--text);font:inherit;font-size:15px;padding:8px 10px}
+#say button,#go{font:inherit;font-size:15px;cursor:pointer;border:0;padding:8px 14px;background:var(--ember);color:#1c1206;font-weight:500;white-space:nowrap}
+#say button:active,#go:active{transform:translateY(1px)}
+#go{margin-top:16px}#go:disabled{background:#3a3e4a;color:#8f8f94;cursor:default}
+#p1{background:#f2f0e8;color:#233d33}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.tabs button{font:inherit;font-size:15px;cursor:pointer;background:none;color:inherit;border:1px solid #9fac9f;padding:6px 16px}
+.tabs button[aria-pressed=true]{background:#3f6652;border-color:#3f6652;color:#f2f0e8}
+.src{color:#55665b;margin:0 0 18px}
+#role-title{font:900 28px/1.3 var(--body);margin:0 0 8px}
+#role-copy{margin:0;font-size:18px}
+#p2{background:#151716;color:#e9e7de}
+.task{display:flex;align-items:center;gap:14px;width:100%;padding:14px 0;background:none;border:0;border-top:1px solid #3e423c;color:inherit;font:inherit;font-size:19px;text-align:left;cursor:pointer}
+.task i{width:22px;height:22px;border:2px solid #e7b66b;flex:none;display:grid;place-items:center}
+.task.done i{background:#e7b66b}
+.task.done span{text-decoration:line-through;opacity:.55}
+#count{font:900 40px/1 var(--body);color:#e7b66b;margin:18px 0 0}
+@media (max-width:640px){.talk{grid-template-columns:minmax(0,1fr)}}
+</style>
+<canvas id="gl" role="img" aria-label="跟著滑鼠移動的黑洞，以及三個作品的名字"></canvas>
+<p id="mark">wuu</p>
+<nav class="sr" aria-label="作品"><button data-open="0">記憶橋接</button><button data-open="1">簡歷工作台</button><button data-open="2">個人工作台</button></nav>
+<div id="scrim"></div>
+
+<section class="panel" id="p0" role="dialog" aria-label="記憶橋接">
+<button class="x" aria-label="關閉"><svg viewBox="0 0 18 18"><path d="M2 2l14 14M16 2L2 16"/></svg></button>
+<h2>換一個 AI，不用再講一遍</h2><p>我同時用 Claude Code 和 Codex，這個工具讓它們共用進度。你試試：</p>
+<div class="talk"><div class="side"><b>Claude Code</b><div id="left"></div><form id="say"><input id="line" aria-label="對 Claude Code 說的話" value="幫我把報告改成三頁"><button>送出</button></form></div>
+<div class="side"><b>Codex</b><div id="right"></div></div></div>
+<button id="go" disabled>換到 Codex</button>
+<p class="note">這裡是模擬。真正的版本用 Hook 自動保存，在你下一句話時交給另一邊。</p>
+<a class="link" href="https://github.com/ooooo-420/blackhole-memory-bridge">GitHub 上的程式碼</a>
+</section>
+
+<section class="panel" id="p1" role="dialog" aria-label="簡歷工作台">
+<button class="x" aria-label="關閉"><svg viewBox="0 0 18 18"><path d="M2 2l14 14M16 2L2 16"/></svg></button>
+<h2>同一段經歷，投不同崗位</h2><p>簡歷工作台從真實作品裡找證據，不編造。選一個崗位看看：</p>
+<div class="tabs"><button data-role="PE/VC" aria-pressed="true">PE/VC</button><button data-role="FA" aria-pressed="false">FA</button><button data-role="戰略分析" aria-pressed="false">戰略分析</button></div>
+<p class="src">原文：按區域拆分收入，核對合併範圍，比較客戶結構，形成業務與風險分析。</p>
+<p id="role-title"></p><p id="role-copy"></p>
+<p class="note">示例資料</p>
+<a class="link" href="https://wuu-resume-workbench-showcase.peachy-horse-6031.chatgpt.site">完整展示</a>
+</section>
+
+<section class="panel" id="p2" role="dialog" aria-label="個人工作台">
+<button class="x" aria-label="關閉"><svg viewBox="0 0 18 18"><path d="M2 2l14 14M16 2L2 16"/></svg></button>
+<h2>今天要做什麼，打開就知道</h2><p>安排、投遞和項目都在一處，一條記錄只寫一次。</p>
+<button class="task"><i></i><span>閱讀行業資料 · 09:30</span></button><button class="task"><i></i><span>跟進示例投遞 · 14:00</span></button><button class="task"><i></i><span>複盤示例項目 · 17:00</span></button>
+<p id="count">0 / 3</p><p class="note">示例資料</p>
+<a class="link" href="https://wuu-personal-workbench-showcase.peachy-horse-6031.chatgpt.site">完整展示</a>
+</section>
+<script>
+const VS=`attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}`;
+const FS=`precision highp float;
+uniform vec2 res,hole;uniform float R,t,pull;uniform vec4 rgn;uniform sampler2D tex;
+float hash(vec3 p){p=fract(p*.3183+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+ float a=fract(sin(dot(i,vec2(127.1,311.7)))*43758.5),b=fract(sin(dot(i+vec2(1,0),vec2(127.1,311.7)))*43758.5),c=fract(sin(dot(i+vec2(0,1),vec2(127.1,311.7)))*43758.5),d=fract(sin(dot(i+vec2(1,1),vec2(127.1,311.7)))*43758.5);
+ return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}
+float fbm(vec2 p){return .55*noise(p)+.3*noise(p*2.3)+.15*noise(p*5.1);}
+mat3 rx(float a){float c=cos(a),s=sin(a);return mat3(1,0,0,0,c,-s,0,s,c);}
+vec3 stars(vec3 d){vec3 g=floor(d*520.);float h=hash(g);float s=smoothstep(.9975,1.,h);return s*mix(vec3(.75,.85,1.),vec3(1.,.8,.6),hash(g+3.))*(.5+.5*hash(g+7.));}
+vec4 samp(vec2 s){vec2 uv=vec2(s.x*res.y/res.x+.5,.5-s.y);if(uv.x<0.||uv.x>1.||uv.y<0.||uv.y>1.)return vec4(0.);return texture2D(tex,uv);}
+bool inside(vec2 s){return s.x>rgn.x&&s.x<rgn.z&&s.y>rgn.y&&s.y<rgn.w;}
+vec4 words(vec2 s){
+ vec4 base=samp(s);
+ if(pull<=0.)return base;
+ if(inside(s))base=vec4(0.);
+ vec2 d=s-hole;float m=length(d)/1.1;float k=clamp((pull-min(m,1.)*.6)/.4,0.,1.);float e=k*k*k;float a=-e*e*e*5.;float c=cos(a),n=sin(a);
+ vec2 sp=hole+mat2(c,-n,n,c)*d/max(1.-e,.02);
+ if(inside(sp)){vec4 b=samp(sp);if(b.a>base.a)return b;}
+ return base;
+}
+void main(){
+ vec2 p=(gl_FragCoord.xy-.5*res)/res.y;
+ vec2 l=(p-hole)/R;
+ mat3 T=rx(.17+.05*sin(t*.11));
+ vec3 x=T*vec3(0.,0.,-14.),v=T*normalize(vec3(l*.5,1.));
+ vec3 hc=cross(x,v);float h2=dot(hc,hc);
+ vec3 col=vec3(0.);float alpha=0.;bool cap=false;
+ for(int i=0;i<70;i++){
+  float r2=dot(x,x),r=sqrt(r2);
+  if(r<1.02){cap=true;break;}
+  if(r>32.&&dot(x,v)>0.)break;
+  float dt=clamp(r*.09,.04,1.1);
+  v+=-1.5*h2*x/(r2*r2*r)*dt;
+  vec3 n=x+v*dt;
+  if(x.y*n.y<0.){
+   vec3 c=x+(n-x)*(x.y/(x.y-n.y));float rr=length(c.xz);
+   if(rr>2.3&&rr<7.8){
+    float ang=atan(c.z,c.x),q=(rr-2.3)/5.5;
+    float sw=fbm(vec2(ang*3.+rr*.9-t*2.6/pow(rr,1.5)*3.,rr*2.6));
+    float dens=smoothstep(0.,.06,q)*pow(1.-q,1.7)*(.28+1.5*sw*sw);
+    vec3 vel=normalize(vec3(-c.z,0.,c.x));
+    float dop=pow(max(0.,1.+.62*dot(vel,normalize(v))),3.);
+    vec3 temp=mix(vec3(1.,.93,.78),vec3(1.,.42,.1),smoothstep(0.,.75,q));
+    float aa=clamp(dens*1.5,0.,1.);
+    col+=(1.-alpha)*temp*dens*dop*2.3;alpha+=(1.-alpha)*aa;
+   }
+  }
+  x=n;
+ }
+ vec3 bg=vec3(0.);
+ if(!cap){
+  vec3 d=normalize(v)*T;
+  bg=stars(d);
+  if(d.z>.03){vec2 s=hole+(d.xy/d.z)*2.*R;s=mix(p,s,smoothstep(5.2,1.7,length(l)));vec4 w=words(s);bg=mix(bg,w.rgb,w.a);}
+ }
+ vec3 c=col+(1.-alpha)*bg;
+ float g=length(l);c+=vec3(1.,.55,.22)*.035/(1.+g*g*.6);
+ c=c/(1.+.25*c);c=pow(c,vec3(.92));
+ gl_FragColor=vec4(c,1.);
+}`;
+const WORKS=[{name:'記憶橋接',x:.25,y:.27},{name:'簡歷工作台',x:.72,y:.45},{name:'個人工作台',x:.33,y:.76}];
+const cv=document.getElementById('gl'),gl=cv.getContext('webgl',{antialias:false,alpha:false,powerPreference:'high-performance'});
+function sh(t,s){const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(x));return x}
+const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const L=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(L);gl.vertexAttribPointer(L,2,gl.FLOAT,false,0,0);
+const U=n=>gl.getUniformLocation(pr,n),uRes=U('res'),uHole=U('hole'),uR=U('R'),uT=U('t'),uPull=U('pull'),uRgn=U('rgn');
+gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+const tc=document.createElement('canvas'),tx=tc.getContext('2d');
+let scale=.8,slow=0,last=0;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.fillStyle='#f7f0e0';tx.textBaseline='middle';tx.textAlign='center';const fs=Math.min(w*.075,h*.15);tx.font=`900 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+ const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
+ gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc)}
+function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);paint()}
+addEventListener('resize',resize);
+const S={mode:'free',hole:[0,-.02],aim:[0,-.02],R:.2,pull:0,target:-1,moved:false,armed:true,at:0};
+const toP=e=>[(e.clientX-innerWidth/2)/innerHeight,-(e.clientY-innerHeight/2)/innerHeight];
+addEventListener('pointermove',e=>{S.moved=true;if(S.mode==='free')S.aim=toP(e)});
+const overWord=(p,k,m)=>p[0]>k.r[0]-m&&p[0]<k.r[2]+m&&p[1]>k.r[1]-m&&p[1]<k.r[3]+m;
+addEventListener('pointerdown',e=>{if(S.mode!=='free'||e.target!==cv)return;const p=toP(e);WORKS.forEach((k,i)=>{if(overWord(p,k,0))begin(i)})});
+function begin(i){if(S.mode!=='free')return;S.mode='in';S.target=i;S.at=performance.now();const k=WORKS[i];S.aim=[(k.r[0]+k.r[2])/2,(k.r[1]+k.r[3])/2-.02];gl.uniform4f(uRgn,...k.r)}
+const panels=[0,1,2].map(i=>document.getElementById('p'+i));const scrim=document.getElementById('scrim');
+const holePx=()=>[innerWidth/2+S.hole[0]*innerHeight,innerHeight/2-S.hole[1]*innerHeight];
+function openPanel(i){const el=panels[i];el.classList.add('on');scrim.classList.add('on');const [x,y]=holePx(),r=el.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
+ if(!reduce)el.animate([{transform:`translate(${dx}px,${dy}px) scale(.02) rotate(200deg)`,opacity:.2},{transform:'none',opacity:1}],{duration:750,easing:'cubic-bezier(.16,1,.3,1)'});
+ S.mode='open'}
+function closePanel(){if(S.mode!=='open')return;const el=panels[S.target];S.mode='out';scrim.classList.remove('on');const [x,y]=holePx(),r=el.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
+ const done=()=>{el.classList.remove('on');S.at=performance.now();S.mode='back'};
+ if(reduce)return done();el.animate([{transform:'none',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.02) rotate(-200deg)`,opacity:.2}],{duration:420,easing:'cubic-bezier(.6,0,.9,.4)'}).onfinish=done}
+scrim.addEventListener('click',closePanel);addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
+document.querySelectorAll('.x').forEach(b=>b.addEventListener('click',closePanel));
+document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>begin(+b.dataset.open)));
+/* memory demo */
+const left=document.getElementById('left'),right=document.getElementById('right'),go=document.getElementById('go'),line=document.getElementById('line');let saved='';
+const add=(box,t,ai)=>{const d=document.createElement('div');d.className='msg'+(ai?' ai':'');d.textContent=t;box.append(d);d.style.marginBottom='8px'};
+document.getElementById('say').addEventListener('submit',e=>{e.preventDefault();const t=line.value.trim();if(!t)return;saved=t;add(left,t);add(left,'好，開始處理。',true);line.value='';go.disabled=false});
+go.addEventListener('click',()=>{if(!saved)return;right.replaceChildren();add(right,'接著做？');add(right,`我看到你剛才在 Claude Code 說「${saved}」，已經開始處理了。我接著做。`,true);go.disabled=true});
+/* resume demo */
+const roles={'PE/VC':['財務與業務核驗','核對項目收入的合併範圍，按區域拆解業務構成，結合客戶結構形成風險分析，供項目討論使用。'],'FA':['項目材料與比較分析','按區域與客戶結構組織業務數據，標注不同口徑，形成項目介紹與比較分析材料。'],'戰略分析':['業務結構與風險判斷','拆解不同區域及客戶的收入構成，識別口徑差異，整理業務結構與風險判斷依據。']};
+function role(k){document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===k));document.getElementById('role-title').textContent=roles[k][0];document.getElementById('role-copy').textContent=roles[k][1]}
+document.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>role(b.dataset.role)));role('PE/VC');
+/* workbench demo */
+document.querySelectorAll('.task').forEach(b=>b.addEventListener('click',()=>{b.classList.toggle('done');document.getElementById('count').textContent=document.querySelectorAll('.task.done').length+' / 3'}));
+function tick(ms){
+ const dt=ms-last;last=ms;if(dt>30&&dt<400)slow++;else slow=Math.max(0,slow-1);if(slow>25&&scale>.45){scale-=.13;slow=0;resize()}
+ const a=innerWidth/innerHeight;
+ if(S.mode==='free'){
+  if(!S.moved&&!reduce)S.aim=[Math.sin(ms*.00035)*.26*a,Math.sin(ms*.00052)*.04-.02];
+  if(S.moved){if(S.armed){WORKS.forEach((k,i)=>{if(overWord(S.hole,k,.01))begin(i)})}
+  else if(!WORKS.some(k=>overWord(S.hole,k,.06)))S.armed=true}
+ }
+ if(S.mode==='in'){const q=(performance.now()-S.at)/1050;S.pull=Math.min(1,q);if(q>=1)openPanel(S.target)}
+ if(S.mode==='open')S.aim=[.42*a,-.36];
+ if(S.mode==='back'){const q=(performance.now()-S.at)/800;S.pull=Math.max(0,1-q);if(q>=1){S.mode='free';S.armed=false;S.pull=0}}
+ const follow=S.mode==='free'?.11:.07;S.hole[0]+=(S.aim[0]-S.hole[0])*follow;S.hole[1]+=(S.aim[1]-S.hole[1])*follow;
+ const Rt=S.mode==='open'?.13:S.mode==='in'?.22:.17;S.R+=(Rt-S.R)*.06;
+ gl.uniform2f(uHole,S.hole[0],S.hole[1]);gl.uniform1f(uR,S.R);gl.uniform1f(uT,ms/1000);gl.uniform1f(uPull,S.pull);
+ gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(tick);
+}
+window.__S=S;window.__works=WORKS;
+gl.uniform4f(uRgn,0,0,0,0);resize();
+(document.fonts?document.fonts.load('900 60px "Noto Sans TC"','記憶橋接簡歷工作台個人').catch(()=>{}):Promise.resolve()).then(()=>{paint();requestAnimationFrame(tick)});
+</script>
