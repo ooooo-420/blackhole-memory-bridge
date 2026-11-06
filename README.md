@@ -1,49 +1,51 @@
-# 黑洞記憶橋接
+# Black Hole Memory Bridge
 
-我同時用 Claude Code 和 Codex，每次換工具都要重講一遍進度。這個項目讓兩邊自動保存對話，並在你下一句話時把對方的新記錄交過來。桌面上還有一隻黑洞桌寵。
+I use both Claude Code and Codex, and every time I switched tools I had to explain my progress again. This project saves both sides' conversations automatically and hands over the other side's new records on your next message. There is also a black hole desktop pet.
 
-[玩玩看](https://ooooo-420.github.io/blackhole-memory-bridge/)
+[Portfolio](https://ooooo-420.github.io/blackhole-memory-bridge/)
 
-## 它怎麼運作
+## How it works
 
-1. 你送出訊息時，Hook 記下原話，並附上另一端的新記錄。
-2. 回合結束時，Hook 把原話和 AI 的回覆存進該工具自己的記錄檔。
-3. 新對話收到最新 3 筆記錄和分支清單；進行中的對話只收另一端的新記錄。
+1. When you send a message, a hook records your words and attaches the other side's new records.
+2. When a turn ends, a hook saves your words and the AI's reply to that tool's own log.
+3. A new conversation receives the latest 3 records and the branch list. A running conversation receives only the other side's new records.
 
-記憶由 Hook 處理，不依賴黑洞。黑洞負責顯示狀態、暫停傳遞、斷線警告，以及打開另一個 AI 時的吸入動畫。
+Hooks handle the memory, so it does not depend on the black hole. The black hole shows status, pauses delivery, warns about broken connections, and plays the swallow animation when opening the other AI.
 
-## 我做過的取捨
+## Trade-offs
 
-- **不偵測對方是否空閒。** 最初的設計是空閒時推送記憶，但判斷不可靠，還可能打斷對話。後來改成你開口時才交接。
-- **黑洞關閉時也照常傳遞。** 我考慮過關閉時只保存，但忘了開黑洞就會接不上進度。想暫停時用右鍵選單。
-- **傳遞前篩選，但原始記錄全留。** 只跳過明顯的探測訊息，不按長度篩選，因為「好，加保險」這種短句可能是決策。
-- **讀桌面圖示位置時不讀 explorer 記憶體。** 改用 Windows 的外殼介面，避免行為看起來像注入程序。
+- **No detection of whether the other side is idle.** The first design pushed memory when the other side was idle, but that signal was unreliable and could interrupt a conversation. Handover now happens when you speak.
+- **Delivery continues while the black hole is closed.** I considered save-only while closed, but forgetting to open it would break continuity. To pause, use the right-click menu.
+- **Filter before delivery, keep every raw record.** Only obvious probe messages are skipped. Nothing is filtered by length, because a short "OK, add the safeguard" can be a decision.
+- **Desktop icon positions are read without touching explorer's memory.** It uses the Windows shell interface, so it does not behave like process injection.
 
-## 踩過的坑
+## Pitfalls
 
-- 桌寵拖起來卡，我先猜粒子太多，量出來每幀只要約 2 毫秒。真正的問題是計時器實際約 47 毫秒才跑一次，改掉後從約 21 幀提到約 60 幀。
-- PowerShell 的 `[Math]::Min(1, 0.047)` 會回傳 0，因為它選了整數版本，讓轉場動畫完全卡住。
-- 某個項目的 `package.json` 設了 `"type": "module"`，Hook 直接失敗，對話卻完全正常。所以後來加了斷線警告。
+- Dragging the pet stuttered. I first blamed too many particles, but each frame took only about 2 ms. The real issue was a timer firing only about every 47 ms; fixing it raised the rate from about 21 to about 60 fps.
+- PowerShell's `[Math]::Min(1, 0.047)` returns 0 because it picks the integer overload, which froze the transition animation.
+- One project's `package.json` set `"type": "module"`. The hook failed outright while the conversation looked normal, which is why the connection warning exists.
 
-## 目前的限制
+## Current limits
 
-- 只在 Windows 上跑過，而且是我自己的環境，沒有通用安裝程式。
-- 記錄是明文存在本機的，不要在這類項目裡貼密碼。
-- 新的 Codex Hook 要在 Codex 裡手動信任才會執行。
-- 開啟 Claude 時的吸入動畫、原本已最大化的視窗，都還沒實測。
+- It has only run on Windows, in my own environment. There is no general installer.
+- Records are stored locally in plain text, so do not paste passwords into these projects.
+- New Codex hooks must be trusted manually in Codex before they run.
+- The swallow animation when opening Claude, and windows that start maximized, are untested.
+- Some code comments and the pet's interface are still in Chinese.
 
-## 檔案
+## Files
 
-| 路徑 | 用途 |
+| Path | Purpose |
 |---|---|
-| `bridge/bridge.js` | 保存、傳遞和健康檢查 |
-| `bridge/package.json` | 避免被專案的 ES 模組設定影響 |
-| `config/claude-settings.json` | 放到專案的 `.claude/settings.json` |
-| `config/codex-hooks.json` | 放到專案的 `.codex/hooks.json` |
-| `pet/黑洞桌寵.ps1` | 桌面黑洞 |
-| `pet/projects.example.json` | 黑洞要監看的專案，複製成 `projects.json` 後填入路徑 |
-| `docs/AGENTS.example.md` | 給 AI 的分支和保存規則範本 |
+| `index.html` | Portfolio page |
+| `bridge/bridge.js` | Saving, delivery and health checks |
+| `bridge/package.json` | Keeps the project's ES module setting from breaking the bridge |
+| `config/claude-settings.json` | Goes to the project's `.claude/settings.json` |
+| `config/codex-hooks.json` | Goes to the project's `.codex/hooks.json` |
+| `pet/黑洞桌寵.ps1` | Desktop black hole |
+| `pet/projects.example.json` | Projects the black hole watches; copy to `projects.json` and fill in the paths |
+| `docs/AGENTS.example.md` | Branch and memory rules template for the AI |
 
-把 `bridge/` 複製成專案裡的 `.memory-bridge/`，再放好上面兩個設定檔。
+Copy `bridge/` into your project as `.memory-bridge/`, then put the two config files in place.
 
-這個項目由我提需求、定規則，與 Claude Code 和 Codex 協作實現。
+I set the requirements and rules, and built this together with Claude Code and Codex.
