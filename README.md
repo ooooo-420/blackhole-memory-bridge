@@ -2,7 +2,7 @@
 
 我同時用 Claude Code 和 Codex，每次換工具都要重講一遍進度。這個項目讓兩邊自動保存對話，並在你下一句話時把對方的新記錄交過來。桌面上還有一隻黑洞桌寵。
 
-短片（程式製作的流程示意，不是錄屏）：[docs/demo.mp4](docs/demo.mp4)
+[玩玩看](https://ooooo-420.github.io/blackhole-memory-bridge/)
 
 ## 它怎麼運作
 
