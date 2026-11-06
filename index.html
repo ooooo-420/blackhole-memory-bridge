@@ -12,6 +12,7 @@
 html,body{height:100%;margin:0;overflow:hidden;background:var(--void);color:var(--text);font:400 17px/1.7 var(--body)}
 ::selection{background:var(--ember);color:#000}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+#gl{touch-action:none}
 #mark{position:fixed;z-index:2;left:28px;top:18px;margin:0;font:800 26px/1 "Bricolage Grotesque",var(--body);letter-spacing:-.02em}
 .sr{position:fixed;z-index:1;left:28px;bottom:20px;display:flex;gap:18px}
 .sr button{all:unset;cursor:pointer;color:var(--soft);font-size:14px}
@@ -54,7 +55,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 #count{font:900 40px/1 var(--body);color:#e7b66b;margin:18px 0 0}
 @media (max-width:640px){.talk{grid-template-columns:minmax(0,1fr)}}
 </style>
-<canvas id="gl" role="img" aria-label="跟著滑鼠移動的黑洞，以及三個作品的名字"></canvas>
+<canvas id="gl" role="img" aria-label="黑洞和三個作品的名字。點名字，或把黑洞拖到名字上"></canvas>
 <p id="mark">wuu</p>
 <nav class="sr" aria-label="作品"><button data-open="0">記憶橋接</button><button data-open="1">簡歷工作台</button><button data-open="2">個人工作台</button></nav>
 <div id="scrim"></div>
@@ -158,19 +159,29 @@ const U=n=>gl.getUniformLocation(pr,n),uRes=U('res'),uHole=U('hole'),uR=U('R'),u
 gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
 const tc=document.createElement('canvas'),tx=tc.getContext('2d');
-let scale=.8,slow=0,last=0;
+let scale=.8,slow=0,last=0,hover=-1;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.fillStyle='#f7f0e0';tx.textBaseline='middle';tx.textAlign='center';const fs=Math.min(w*.075,h*.15);tx.font=`900 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
- const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
+function paint(){const w=Math.min(1920,innerWidth*1.2),h=w*innerHeight/innerWidth;tc.width=w;tc.height=h;tx.clearRect(0,0,w,h);tx.textBaseline='middle';tx.textAlign='center';const fs=Math.min(w*.075,h*.15);tx.font=`900 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+ const a=innerWidth/innerHeight;for(const k of WORKS){tx.fillStyle=WORKS[hover]===k?'#ffb56b':'#f7f0e0';tx.fillText(k.name,k.x*w,k.y*h);const tw=tx.measureText(k.name).width/w*a,fh=fs/h;const cx=(k.x-.5)*a,cy=.5-k.y;k.r=[cx-tw/2-.015,cy-fh*.62,cx+tw/2+.015,cy+fh*.62]}
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc)}
 function resize(){cv.width=Math.round(innerWidth*scale);cv.height=Math.round(innerHeight*scale);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(uRes,cv.width,cv.height);paint()}
 addEventListener('resize',resize);
-const S={mode:'free',hole:[0,-.02],aim:[0,-.02],R:.2,pull:0,target:-1,moved:false,armed:true,at:0};
+const S={mode:'free',hole:[0,-.02],aim:[0,-.02],R:.2,pull:0,target:-1,moved:false,armed:true,at:0,drag:false};
 const toP=e=>[(e.clientX-innerWidth/2)/innerHeight,-(e.clientY-innerHeight/2)/innerHeight];
-addEventListener('pointermove',e=>{S.moved=true;if(S.mode==='free')S.aim=toP(e)});
 const overWord=(p,k,m)=>p[0]>k.r[0]-m&&p[0]<k.r[2]+m&&p[1]>k.r[1]-m&&p[1]<k.r[3]+m;
-addEventListener('pointerdown',e=>{if(S.mode!=='free'||e.target!==cv)return;const p=toP(e);WORKS.forEach((k,i)=>{if(overWord(p,k,0))begin(i)})});
-function begin(i){if(S.mode!=='free')return;S.mode='in';S.target=i;S.at=performance.now();const k=WORKS[i];S.aim=[(k.r[0]+k.r[2])/2,(k.r[1]+k.r[3])/2-.02];gl.uniform4f(uRgn,...k.r)}
+const onHole=p=>Math.hypot(p[0]-S.hole[0],p[1]-S.hole[1])<S.R*1.1;
+const wordAt=p=>WORKS.findIndex(k=>overWord(p,k,0));
+function setHover(i){if(i!==hover){hover=i;paint()}}
+addEventListener('pointermove',e=>{const p=toP(e);
+ if(S.drag){S.aim=p;return}
+ if(S.mode!=='free'||e.target!==cv){setHover(-1);cv.style.cursor='default';return}
+ const hole=onHole(p),i=hole?-1:wordAt(p);setHover(i);cv.style.cursor=hole?'grab':i>=0?'pointer':'default'});
+cv.addEventListener('pointerdown',e=>{if(S.mode!=='free')return;const p=toP(e);
+ if(onHole(p)){S.drag=true;S.moved=true;S.aim=p;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';return}
+ const i=wordAt(p);if(i>=0)begin(i)});
+const drop=()=>{if(S.drag){S.drag=false;cv.style.cursor='grab'}};
+addEventListener('pointerup',drop);addEventListener('pointercancel',drop);
+function begin(i){if(S.mode!=='free')return;S.drag=false;setHover(-1);cv.style.cursor='default';S.mode='go';S.target=i;S.at=performance.now();const k=WORKS[i];S.aim=[(k.r[0]+k.r[2])/2,(k.r[1]+k.r[3])/2-.02];gl.uniform4f(uRgn,...k.r)}
 const panels=[0,1,2].map(i=>document.getElementById('p'+i));const scrim=document.getElementById('scrim');
 const holePx=()=>[innerWidth/2+S.hole[0]*innerHeight,innerHeight/2-S.hole[1]*innerHeight];
 function openPanel(i){const el=panels[i];el.classList.add('on');scrim.classList.add('on');const [x,y]=holePx(),r=el.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
@@ -198,13 +209,14 @@ function tick(ms){
  const a=innerWidth/innerHeight;
  if(S.mode==='free'){
   if(!S.moved&&!reduce)S.aim=[Math.sin(ms*.00035)*.26*a,Math.sin(ms*.00052)*.04-.02];
-  if(S.moved){if(S.armed){WORKS.forEach((k,i)=>{if(overWord(S.hole,k,.01))begin(i)})}
-  else if(!WORKS.some(k=>overWord(S.hole,k,.06)))S.armed=true}
+  if(S.drag&&S.armed){WORKS.forEach((k,i)=>{if(overWord(S.hole,k,.01))begin(i)})}
+  if(!S.armed&&!WORKS.some(k=>overWord(S.hole,k,.06)))S.armed=true;
  }
+ if(S.mode==='go'&&(Math.hypot(S.aim[0]-S.hole[0],S.aim[1]-S.hole[1])<.02||performance.now()-S.at>1400)){S.mode='in';S.at=performance.now()}
  if(S.mode==='in'){const q=(performance.now()-S.at)/1050;S.pull=Math.min(1,q);if(q>=1)openPanel(S.target)}
  if(S.mode==='open')S.aim=[.42*a,-.36];
- if(S.mode==='back'){const q=(performance.now()-S.at)/800;S.pull=Math.max(0,1-q);if(q>=1){S.mode='free';S.armed=false;S.pull=0}}
- const follow=S.mode==='free'?.11:.07;S.hole[0]+=(S.aim[0]-S.hole[0])*follow;S.hole[1]+=(S.aim[1]-S.hole[1])*follow;
+ if(S.mode==='back'){const q=(performance.now()-S.at)/800;S.pull=Math.max(0,1-q);if(q>=1){S.mode='free';S.armed=false;S.pull=0;S.moved=false}}
+ const follow=S.mode==='free'?(S.drag?.2:.04):S.mode==='go'?.09:.07;S.hole[0]+=(S.aim[0]-S.hole[0])*follow;S.hole[1]+=(S.aim[1]-S.hole[1])*follow;
  const Rt=S.mode==='open'?.13:S.mode==='in'?.22:.17;S.R+=(Rt-S.R)*.06;
  gl.uniform2f(uHole,S.hole[0],S.hole[1]);gl.uniform1f(uR,S.R);gl.uniform1f(uT,ms/1000);gl.uniform1f(uPull,S.pull);
  gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(tick);
